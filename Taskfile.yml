@@ -2,7 +2,7 @@
 version: '3'
 output: prefixed
 env:
-  STACK_NAME: BARMER-CF-LICENSE-MARKETPLACE-AUTOMATION
+  STACK_NAME: 
   SOLUTIONTEMPLATE: cloudformation/template.yaml
   PACKAGE: cloudformation/packaged.yaml
   IAMROLETEMPLATE: cloudformation/iamrole-template.yaml
