@@ -10,8 +10,9 @@ The Solution will take care that if new Accounts are added, existing are SUSPEND
 
 ![Architecture](./static/marketplacesubscription.png "Architecture")
 
-:warning: The API is currently very slow - when i was  adding removing around 20 Accounts it was already taking 2-3 hours.
+⚠️ The API is currently very slow - when i was  adding removing around 20 Accounts it was already taking 2-3 hours.
 
+ℹ️ - You cannot share a License which is already existing in the target account. 
 ### Update Trigger
 
 - TagResource: Will trigger an update of one account only. Python will grab the specific changed parameter for Licence Management from the requestParameters of the presented CloudTrail event.
