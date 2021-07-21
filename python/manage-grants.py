@@ -48,14 +48,14 @@ def update_one_account(account,value):
             if license['Status'] == 'AVAILABLE':
                 try:
                     grant = get_grant_byname(account,license['LicenseArn'])
-                    if grant != 'null':
+                    if grant == 'null':
                         grant = licmgn.create_grant(
                         GrantName=account,
                         LicenseArn=license['LicenseArn'],
                         Principals=list(f"arn:aws:iam::{account}:root".split(" ")),
                         HomeRegion=license['HomeRegion'],
                         ClientToken=str(time.time()),
-                        AllowedOperations=['CheckoutLicense','ListPurchasedLicenses', 'CheckoutBorrowLicense', 'CheckInLicense'])
+                        AllowedOperations=['CheckoutLicense','ListPurchasedLicenses', 'CheckInLicense'])
                         licmgn.create_grant_version(
                         GrantArn=grant['GrantArn'],
                         GrantName=account,
@@ -136,14 +136,14 @@ def update_all_accounts():
                 for account in to_be_created:
                     try:
                         grant = get_grant_byname(account,license['LicenseArn'])
-                        if grant != 'null':
+                        if grant == 'null':
                             grant = licmgn.create_grant(
                             GrantName=account,
                             LicenseArn=license['LicenseArn'],
                             Principals=list(f"arn:aws:iam::{account}:root".split(" ")),
                             HomeRegion=license['HomeRegion'],
                             ClientToken=str(time.time()),
-                            AllowedOperations=['CheckoutLicense','ListPurchasedLicenses', 'CheckoutBorrowLicense', 'CheckInLicense'])
+                            AllowedOperations=['CheckoutLicense','ListPurchasedLicenses', 'CheckInLicense'])
                             licmgn.create_grant_version(
                             GrantArn=grant['GrantArn'],
                             GrantName=account,
