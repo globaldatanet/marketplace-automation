@@ -55,7 +55,7 @@ License grants can be activated only when both the license administrator and the
 
 4. Choose Link AWS Organizations accounts.
 
-![License Manager - Organizations settings](./images/license-manager-org-trust.png "License Manager - Organizations settings")
+![License Manager - Organizations settings](./static/license-manager-org-trust.png "License Manager - Organizations settings")
 
 ## How to deploy the solution
 
