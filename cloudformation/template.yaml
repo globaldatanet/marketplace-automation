@@ -1,0 +1,140 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: AWS License Managment Solution
+# -----------------------------------------------------------------------------
+# Parameters
+# -----------------------------------------------------------------------------
+Parameters:
+  ResourcePrefix:
+    Description: Optional prefix for resources
+    Type: String
+  TagKey:
+    Description: Key defined on account level for license management
+    Default: 'marketplace-licence'
+    Type: String
+# -----------------------------------------------------------------------------
+# Resources
+# -----------------------------------------------------------------------------
+
+Resources:
+
+  MarketplaceSolutionLogGroup:
+    Type: 'AWS::Logs::LogGroup'
+    Properties:
+      RetentionInDays: 14
+      LogGroupName: !Sub /aws/lambda/${ResourcePrefix}-Marketplace-Solution-${AWS::AccountId}
+
+  LambdaRoleMarketplaceSolution:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Policies:
+        - PolicyName: LambdaPolicyMarketplaceSolution
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Sid: Organizations
+                Effect: Allow
+                Action:
+                  - organizations:ListTagsForResource
+                  - organizations:ListAccounts
+                Resource: '*'
+              - Sid: LicenseManager
+                Effect: Allow
+                Action:
+                  - license-manager:CreateGrant
+                  - license-manager:CreateGrantVersion
+                  - license-manager:DeleteGrant
+                  - license-manager:ListDistributedGrants
+                  - license-manager:ListReceivedLicenses
+                  - license-manager:GetGrant
+                Resource: '*'
+              - Sid: KMS
+                Effect: Allow
+                Action:
+                  - kms:Decrypt
+                  - kms:RetireGrant
+                Resource: '*'
+              - Sid: CloudWatchLogs
+                Effect: Allow
+                Action:
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: '*'
+
+  LambdaFunction:
+    Type: "AWS::Lambda::Function"
+    Properties:
+      Code: python/manage-grants.py
+      Runtime: "python3.8"
+      MemorySize: 128
+      Timeout: 60
+      FunctionName: !Sub ${ResourcePrefix}-Marketplace-Solution-${AWS::AccountId}
+      Handler: manage-grants.lambda_handler
+      Runtime: python3.8
+      Role: !GetAtt LambdaRoleMarketplaceSolution.Arn
+      Environment:
+        Variables:
+          Organizations_Tag: !Ref TagKey
+
+  OrganizationAutomaticLicenseManagerRule:
+    Type: AWS::Events::Rule
+    Properties:
+      Name: OrganizationsTrigger-License-Automation
+      Description: A CloudWatch Event Rule that triggers on AWS Organizations Events.
+      State: ENABLED
+      Targets:
+      - Arn:
+          Fn::GetAtt:
+          - LambdaFunction
+          - Arn
+        Id: OrganizationsTrigger-License-Automation
+      EventPattern: 
+        source:
+        - aws.organizations
+        detail-type:
+        - AWS API Call via CloudTrail
+        detail:
+          eventSource:
+          - organizations.amazonaws.com
+          eventName:
+          - TagResource
+
+  LicensesAutomaticLicenseManagerRule:
+    Type: AWS::Events::Rule
+    Properties:
+      Name: MarketplaceTrigger-License-Automation
+      Description: A CloudWatch Event Rule that triggers on  Events.
+      State: ENABLED
+      Targets:
+      - Arn:
+          Fn::GetAtt:
+          - LambdaFunction
+          - Arn
+        Id: MarketplaceTrigger-License-Automation
+      EventPattern: 
+        source:
+        - aws.cloudtrail
+        detail-type:
+        - AWS API Call via CloudTrail
+        detail:
+          eventSource:
+          - license-manager.amazonaws.com
+          eventName:
+          - ListReceivedGrants
+
+
+  EventsInvokeLicenceAutomation:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !Ref LambdaFunction
+      Principal: events.amazonaws.com
+      SourceArn: !GetAtt LambdaFunction.Arn

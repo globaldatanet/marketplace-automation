@@ -1,0 +1,57 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: AWS License Managment Solution
+# -----------------------------------------------------------------------------
+# Parameters
+# -----------------------------------------------------------------------------
+Parameters:
+  ResourcePrefix:
+    Description: Optional prefix for resources
+    Type: String
+  TagKey:
+    Description: Key defined on account level for license management
+    Default: 'marketplace-licence'
+    Type: String
+# -----------------------------------------------------------------------------
+# Resources
+# -----------------------------------------------------------------------------
+
+Resources:
+
+  PurchaseTeamRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          -
+            Effect: "Allow"
+            Principal:
+              AWS:
+                - !Join [ "", ["arn:aws:iam::", !Ref AWS::AccountId, ":root" ]]
+            Action:
+              - "sts:AssumeRole"
+      Policies:
+        - PolicyName: MarketPlace
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Sid: UsageOfMarketplace
+                Effect: Allow
+                Action: [
+                  "aws-marketplace:*"
+                ]
+                Resource: "*"
+        - PolicyName: Organizations
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Sid: Organizations
+                Effect: Allow
+                Action: 
+                  - "organizations:PutTags"
+                  - "organizations:ListTagsForResource"
+                  - "organizations:ListAccounts"
+                Resource: "*"
+      RoleName: !Sub "${ResourcePrefix}-PurchaseTeamRole"
+
+  

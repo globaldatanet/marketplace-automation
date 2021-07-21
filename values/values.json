@@ -1,0 +1,11 @@
+[   
+    
+    {
+        "ParameterKey": "ResourcePrefix",
+        "ParameterValue": "GDN"
+    },
+    {
+        "ParameterKey": "TagKey",
+        "ParameterValue": "marketplace-licence"
+    }
+]
