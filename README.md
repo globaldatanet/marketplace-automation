@@ -2,15 +2,9 @@ AWS Marketplace Automation
 
 Share Marketplace subscriptions with your AWS Organization
 
-
-## UseCase
-In order to by able to manage Marketplace Subscriptions for a whole aws Organization in one Account - to help the purchase department with their daily work and prevent contracts from being concluded without them, we developed a solution that will enable multi account managing of marketplace subscriptions trough a whole aws organization.
-
-The Solution will take care that if new Accounts are added, existing are SUSPENDED or even if the specific tag for licences is updated at one Account - that every licences which are existing will be shared or removed from that Account.
-
 ![Architecture](./static/marketplacesubscription.png "Architecture")
 
-⚠️ The API is currently very slow - when i was  adding removing around 20 Accounts it was already taking 2-3 hours.
+⚠️ The API is currently very slow - when we were removing around 2 Licenses in around 20 Accounts it was already taking 1-2 hours.
 
 ℹ️ - You cannot share a License which is already existing in the target account. 
 ### Update Trigger
@@ -22,7 +16,8 @@ The Solution will take care that if new Accounts are added, existing are SUSPEND
 ## SCP
 The following Policy will take care that only the Purchase department is able to subcribe to new Marketplace products or unsubscribe old products.
 
-```{
+```json
+{
       "Version": "2012-10-17",
       "Statement": [
             {
@@ -44,8 +39,8 @@ The following Policy will take care that only the Purchase department is able to
                   }
             }
       ]
-}```
-
+}
+```
 ## Prerequisite:
 
 License grants can be activated only when both the license administrator and the grant recipient have enabled the AWS Marketplace Service Linked Role, or trusted access is enabled for AWS Marketplace in the management account of your organization. 
